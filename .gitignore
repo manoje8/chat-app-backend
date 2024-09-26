@@ -1,0 +1,7 @@
+.DS_Store
+.prettierignore
+/node_modules
+/*.env
+*.http
+npm-debud.log
+package-lock.json
