@@ -8,7 +8,7 @@ class Mongo
         if(!MONGODB_URI) throw new Error("MongoDB URI is missing")
 
         await mongoose.connect(MONGODB_URI, {
-            dbName: 'chat-app',
+            dbName: process.env.DATABASE_NAME,
             bufferCommands: false
         })
         .then(() => console.log('MongoDB is connected'))
