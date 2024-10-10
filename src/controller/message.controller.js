@@ -64,7 +64,7 @@ class Message
 
             if(!room) return res.status(200).send([])
 
-            res.status(200).send({message: room.messages})
+            res.status(200).send(room.messages)
 
         } 
         catch (error) 
