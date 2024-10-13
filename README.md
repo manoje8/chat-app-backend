@@ -46,3 +46,10 @@ npm start
 ```
 
 The server will start on port `8000` by default. You can access the application routes in your browser.
+
+
+## Changelog
+
+### v0.0.1
+
+- Added Delete Controller.

@@ -51,7 +51,7 @@ class Message
         }
     }
 
-    static async getMessages(req, res, next)
+    static async getMessagesById(req, res, next)
     {
         const {id} = req.params;
         const senderId = req.payload.uid
@@ -70,6 +70,39 @@ class Message
         catch (error) 
         {
             console.log("Error in fetching message", error);
+            next(error)
+        }
+    }
+
+    static async deleteMessageById(req, res, next)
+    {
+        const {id} = req.params;
+        
+        try 
+        {
+            const findMessage = await messageModel.findById(id)
+            if(!findMessage) return res.status(400).send({message: "message not found"})
+
+            const findRoom = await roomModel.findOne({
+                messages: id
+            });
+
+            if (!findRoom) return res.status(404).json({ message: "Room not found" });
+
+            // Delete the message from the message collection
+            await messageModel.findByIdAndDelete(id)
+
+            // Remove the message ID from the room's message array
+            await roomModel.updateOne(
+                {_id : findRoom._id},
+                { $pull : {messages: id} }
+            )
+
+            res.status(200).send({message: 'Successfully deleted.'})
+        } 
+        catch (error) 
+        {
+            console.log("Error: ", error);
             next(error)
         }
     }
