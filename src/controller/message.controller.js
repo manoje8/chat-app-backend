@@ -7,9 +7,9 @@ class Message
     {
         try 
         {
-            const {message} = req.body;
+            const {message, status} = req.body;
             const {id:recieverId} = req.params;
-            const senderId = req.payload.uid; // log the request 
+            const senderId = req.payload.uid;
 
             if(!recieverId) return res.status(400).send({message: "Reciever Error"})
                 
@@ -28,9 +28,11 @@ class Message
 
             // Create and save the message
             const newMessage = new messageModel({
+                roomId: room._id,
                 senderId,
                 recieverId,
-                message
+                message,
+                status
             })
 
             // Push the new message into the room's messages array
@@ -41,7 +43,7 @@ class Message
             await room.save(); // Save the room after updating
             await newMessage.save(); // Save the message after creation
 
-            res.status(200).send({message: "Message successfully send"})
+            res.status(200).send({message: newMessage})
 
         } 
         catch (error) 
