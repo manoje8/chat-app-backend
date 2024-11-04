@@ -18,7 +18,6 @@ const PORT = process.env.PORT
 app.use(express.json())
 app.use(cors())
 app.use(morgan('dev'))
-app.use("/", router)
 
 const server = createServer(app)
 
@@ -29,6 +28,18 @@ const io = new Server(server, {
     }
 })
 
-io.on("connection", (socket) => handleConnection(io, socket));
+// Initialize online users map
+const onlineUsers = new Map();
+
+// Middleware to attach io and onlineUsers to the request
+app.use((req, res, next) => {
+    req.io = io;
+    req.onlineUsers = onlineUsers;
+    next();
+});
+
+app.use("/", router)
+
+io.on("connection", (socket) => handleConnection(io, socket, onlineUsers));
 
 server.listen(PORT, () => console.log(`Server running on port: ${PORT}`))

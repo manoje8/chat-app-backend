@@ -1,9 +1,7 @@
 import messageModel from "./model/message.model.js";
 import roomModel from "./model/room.model.js";
 
-const onlineUsers = new Map();
-
-const handleConnection = (io, socket) => {
+const handleConnection = (io, socket, onlineUsers) => {
     
     console.log('A user connected:', socket.id);
 
@@ -48,21 +46,18 @@ const handleConnection = (io, socket) => {
     
         // Emit to the receiver if they're online
         if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newMessage", { messageId, status, message: await messageModel.findById(messageId) });
+            io.to(receiverSocketId).emit("messageStatusUpdate", { messageId, status });
         }
     });
 
-    // Todo: Listen for message seen/read by recipient
+    // Listen for message seen/read by recipient
     socket.on("messageSeen", async ({ senderId, receiverId }) => {
         // Update the message status to "seen"
         const room = await roomModel.findOne({
             users: { $all: [senderId, receiverId] }
         });
 
-        if (!room) {
-            console.log("Room not found for these users.");
-            return;
-        }
+        if (!room) return;
 
         // Update all messages from the sender within the room to "seen" status
         await messageModel.updateMany(
