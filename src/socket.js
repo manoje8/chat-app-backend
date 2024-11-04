@@ -53,30 +53,30 @@ const handleConnection = (io, socket) => {
     });
 
     // Todo: Listen for message seen/read by recipient
-    // socket.on("messageSeen", async ({ senderId, receiverId }) => {
-    //     // Update the message status to "seen"
-    //     const room = await roomModel.findOne({
-    //         users: { $all: [senderId, receiverId] }
-    //     });
+    socket.on("messageSeen", async ({ senderId, receiverId }) => {
+        // Update the message status to "seen"
+        const room = await roomModel.findOne({
+            users: { $all: [senderId, receiverId] }
+        });
 
-    //     if (!room) {
-    //         console.log("Room not found for these users.");
-    //         return;
-    //     }
+        if (!room) {
+            console.log("Room not found for these users.");
+            return;
+        }
 
-    //     // Update all messages from the sender within the room to "seen" status
-    //     await messageModel.updateMany(
-    //         { roomId: room._id, senderId, status: { $ne: "seen" } },
-    //         { status: "seen" },
-    //         { new: true }
-    //     );
+        // Update all messages from the sender within the room to "seen" status
+        await messageModel.updateMany(
+            { roomId: room._id, senderId, status: { $ne: "seen" } },
+            { status: "seen" },
+            { new: true }
+        );
         
-    //     // Notify the sender that the message has been seen
-    //     const senderSocketId = onlineUsers.get(senderId);
-    //     if (senderSocketId) {
-    //         io.to(senderSocketId).emit("messageStatusUpdate", { status: "seen" });
-    //     }
-    // });
+        // Notify the sender that the message has been seen
+        const senderSocketId = onlineUsers.get(senderId);
+        if (senderSocketId) {
+            io.to(senderSocketId).emit("messageStatusUpdate", { status: "seen" });
+        }
+    });
 
 
     socket.on('disconnect', () => {
