@@ -8,20 +8,20 @@ class Message
         try 
         {
             const {message, status} = req.body;
-            const {id:recieverId} = req.params;
+            const {id:receiverId} = req.params;
             const senderId = req.payload.uid;
 
-            if(!recieverId) return res.status(400).send({message: "Reciever Error"})
+            if(!receiverId) return res.status(400).send({message: "Receiver Error"})
                 
             // Find or create the room
             let room = await roomModel.findOne({
-                users: {$all: [senderId, recieverId]}
+                users: {$all: [senderId, receiverId]}
             })
 
             if(!room)
             {
                 room = await roomModel.create({
-                    users: [senderId, recieverId],
+                    users: [senderId, receiverId],
                     messages: []
                 })
             }
@@ -30,7 +30,7 @@ class Message
             const newMessage = new messageModel({
                 roomId: room._id,
                 senderId,
-                recieverId,
+                receiverId,
                 message,
                 status
             })
@@ -42,6 +42,20 @@ class Message
 
             await room.save(); // Save the room after updating
             await newMessage.save(); // Save the message after creation
+
+            // Emit event to both sender and receiver
+            const receiverSocketId = req.onlineUsers.get(receiverId);
+            const senderSocketId = req.onlineUsers.get(senderId);
+
+            // Emit to the receiver if they are online
+            if (receiverSocketId) {
+                req.io.to(receiverSocketId).emit("newMessage", newMessage);
+            }
+            // Emit to the sender for confirmation
+            if (senderSocketId) {
+                req.io.to(senderSocketId).emit("newMessage", newMessage);
+            }
+            
 
             res.status(200).send({message: newMessage})
 
@@ -99,6 +113,9 @@ class Message
                 {_id : findRoom._id},
                 { $pull : {messages: id} }
             )
+
+            // Emit messageDeleted event to all participants in the room
+            req.io.emit("messageDeleted", { messageId: id, roomId: findRoom._id });
 
             res.status(200).send({message: 'Successfully deleted.'})
         } 
