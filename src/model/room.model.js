@@ -6,14 +6,12 @@ const roomSchema = new Schema(
         messages: [{type: Types.ObjectId, ref: "messages", default: []}]
     },
     {
-        timestamps: true
-    },
-    {
-        collection: "room",
+        timestamps: true,
+        collection: "rooms",
         versionKey: false
     }
 )
 
-const roomModel = model('room', roomSchema)
+const roomModel = model('rooms', roomSchema)
 
 export default roomModel
