@@ -32,7 +32,7 @@ This is the backend for a real-time chat application built using **Node.js**, **
 1. Clone the repository:
 
 ```
-git clone https://github.com/manoje8/ebook-backend.git
+git clone https://github.com/manoje8/chat-app-backend.git
 ```
 
 2. Install dependencies:
